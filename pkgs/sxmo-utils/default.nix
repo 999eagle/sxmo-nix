@@ -105,6 +105,9 @@ stdenv.mkDerivation rec {
     mkdir -p $out/lib/udev
     mv $out/usr/lib/udev/rules.d $out/lib/udev/
     cd $out && rmdir -p usr/lib/udev/
+
+    mkdir -p $out/etc/fonts/conf.d
+    ln -s $out/share/sxmo/appcfg/fontconfig.conf $out/etc/fonts/conf.d/90-sxmo.conf
   '';
 
   postPatch = ''
@@ -119,7 +122,7 @@ stdenv.mkDerivation rec {
     # We'll be wrapping the sxmo scripts by modifying sxmo_common.sh.
     # Make sure sxmo_common.sh is sourced everywhere so this is consistently applied
     sed -i '2i . sxmo_common.sh' \
-      $(${gnugrep}/bin/grep -rL "\. sxmo_common.sh" --include \*.sh --exclude sxmo_common.sh .)
+      $(${gnugrep}/bin/grep -rL "\. sxmo_common.sh" --include \*.sh --exclude sxmo_common.sh --exclude setup_config_version.sh .)
 
     # Script dependencies
     sed -i '2i export PATH="'"$out"'/bin:${lib.makeBinPath ([

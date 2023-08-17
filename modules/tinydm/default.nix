@@ -70,7 +70,7 @@ in
 
      serviceConfig = {
        Type = "oneshot";
-       StateDirectory = "/var/lib/tinydm/";
+       StateDirectory = "tinydm";
        User = "root";
        Group = "root";
        ExecStart = ''${pkgs.busybox}/bin/rm -f /var/lib/tinydm/default-session.desktop'';

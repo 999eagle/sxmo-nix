@@ -3,6 +3,17 @@
 let
   sxmopkgs = import ../../default.nix { inherit pkgs; };
   dmcfg = config.services.xserver.desktopManager;
+
+  fontConf = pkgs.runCommand "sxmo-font-conf" {} ''
+    mkdir -p $out/etc/fonts/conf.d
+    cat > $out/etc/fonts/conf.d/99-sxmo.conf <<EOF
+    <?xml version="1.0"?>
+    <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+    <fontconfig>
+    <alias><family>Sxmo</family><prefer><family>Symbols Nerd Font</family></prefer></alias>
+    </fontconfig>
+    EOF
+  '';
 in
 {
   options = {
@@ -24,7 +35,8 @@ in
     environment.systemPackages = [ dmcfg.sxmo.package sxmopkgs.superd ];
 
     services.udev.packages = [ dmcfg.sxmo.package ];  # Install udev rules
-    fonts.fonts = [ (pkgs.nerdfonts.override {fonts = ["NerdFontsSymbolsOnly"];}) ]; # Sxmo uses nerdfonts for it's icons
+    fonts.packages = [ (pkgs.nerdfonts.override {fonts = ["NerdFontsSymbolsOnly"];}) ]; # Sxmo uses nerdfonts for its icons
+    fonts.fontconfig.confPackages = [ dmcfg.sxmo.package fontConf ];
     powerManagement.enable = lib.mkDefault true;       # For suspend
     services.xserver.libinput.enable = lib.mkDefault true;
 
