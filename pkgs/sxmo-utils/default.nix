@@ -63,6 +63,7 @@
 , foot
 , grim
 , slurp
+, scdoc
 , x11Support ? true
 , waylandSupport ? true
 , ...
@@ -74,13 +75,13 @@ stdenv.mkDerivation rec {
   # Important: When updating version, grep for /usr/share in sxmo-utils. All instances should be
   # replaced with uses of the xdg_data_path function in sxmo_common.sh, and the devs often forget
   # this. Use your patch here, but also submit your patch to sxmo-utils.
-  version = "1.12.0";
+  version = "1.14.2";
 
   src = fetchFromSourcehut {
     owner = "~mil";
     repo = "sxmo-utils";
     rev = version;
-    sha256 = "sha256-JoOJyoVpSK1iDekaRvltVT6AEi87ZSUDaCidF5tYXlI=";
+    hash = "sha256-1bGCUhf/bt9I8BjG/G7sjYBzLh28iZSC20ml647a3J4=";
   };
 
   patches = [
@@ -92,7 +93,7 @@ stdenv.mkDerivation rec {
   passthru.providedSessions = lib.optionals x11Support [ "sxmo" ]
                            ++ lib.optionals waylandSupport [ "swmo" ];
 
-  nativeBuildInputs = [ coreutils findutils gnused busybox ];
+  nativeBuildInputs = [ coreutils findutils gnused busybox scdoc ];
 
   makeFlags = [
     "DESTDIR=$(out)"
@@ -231,7 +232,7 @@ stdenv.mkDerivation rec {
 
     # rtcwake needs elevated permissions, use doas rather than setuid to avoid the need to reference
     # the NixOS-only /run/wrappers/bin path.
-    substituteInPlace configs/default_hooks/sxmo_hook_suspend.sh \
+    substituteInPlace scripts/core/sxmo_suspend.sh \
       --replace "rtcwake" "doas rtcwake"
 
     # sxmo hardcodes path to sxmo_init.sh, repoint
@@ -241,6 +242,10 @@ stdenv.mkDerivation rec {
       scripts/core/sxmo_rtcwake.sh \
       scripts/core/sxmo_migrate.sh \
       --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
+
+    # sxmo status tries to exec a shell function which doesn't work
+    substituteInPlace scripts/core/sxmo_status_watch.sh \
+      --replace "exec sxmobar" "sxmobar"
   '';
 
   meta = with lib; {
