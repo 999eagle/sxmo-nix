@@ -24,7 +24,7 @@ in
     environment.systemPackages = [ dmcfg.sxmo.package sxmopkgs.superd ];
 
     services.udev.packages = [ dmcfg.sxmo.package ];  # Install udev rules
-    fonts.fonts = [ pkgs.nerdfonts ];                  # Sxmo uses nerdfonts for it's icons
+    fonts.fonts = [ (pkgs.nerdfonts.override {fonts = ["NerdFontsSymbolsOnly"];}) ]; # Sxmo uses nerdfonts for it's icons
     powerManagement.enable = lib.mkDefault true;       # For suspend
     services.xserver.libinput.enable = lib.mkDefault true;
 
